@@ -1,0 +1,1 @@
+export 'view/package_activation2.dart';
