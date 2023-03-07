@@ -1,9 +1,46 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+
 import 'package:google_fonts/google_fonts.dart';
+import 'package:intl/intl.dart';
+import 'package:project_1/add_employee/view/widgets.dart';
+
+import 'dart:io';
+
+import '../database/Employeedatabase.dart';
+import '../database/employeeDeo.dart';
+import '../database/model.dart';
 
 class AddEmployeeMangeScreen extends StatefulWidget {
-  AddEmployeeMangeScreen({super.key});
+  AddEmployeeMangeScreen({
+    super.key,
+    this.id,
+    this.joinDate,
+    this.name,
+    this.desstin,
+    this.number,
+    this.adress,
+    this.type,
+  });
+  EmployeeDao? deo;
+
+  final TextEditingController idController = TextEditingController();
+  final TextEditingController joniningController = TextEditingController();
+  final TextEditingController nameController = TextEditingController();
+  final TextEditingController desstinationController = TextEditingController();
+  final TextEditingController numberController = TextEditingController();
+  final TextEditingController addressController = TextEditingController();
+  final TextEditingController payController = TextEditingController();
+  final TextEditingController typeController = TextEditingController();
+
+  final int? id;
+  final String? type;
+  final String? joinDate;
+  final String? name;
+  final String? desstin;
+  final String? number;
+  final String? adress;
 
   @override
   State<AddEmployeeMangeScreen> createState() => _AddEmployeeMangeScreenState();
@@ -11,25 +48,44 @@ class AddEmployeeMangeScreen extends StatefulWidget {
 
 class _AddEmployeeMangeScreenState extends State<AddEmployeeMangeScreen> {
   String? gander;
-  bool _value = true;
+  bool _value = false;
+
+  String? buttontao;
+
+  bool idNull = true;
+
+  @override
+  void initState() {
+    if (widget.id != null) {
+      widget.joniningController.text = widget.joinDate!;
+      widget.nameController.text = widget.name!;
+      widget.desstinationController.text = widget.desstin!;
+      buttontao = widget.type!;
+      widget.numberController.text = widget.number!;
+      widget.addressController.text = widget.adress!;
+      idNull = false;
+    }
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     var media = MediaQuery.of(context);
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: PreferredSize(
-        preferredSize: Size.fromHeight(60.0), // here the desired height
+        preferredSize: const Size.fromHeight(60.0),
         child: AppBar(
           leading: IconButton(
             onPressed: () {
               Navigator.pop(context);
             },
-            icon: Icon(Icons.arrow_back),
+            icon: const Icon(Icons.arrow_back),
             color: Colors.black,
           ),
           flexibleSpace: Padding(
             padding: EdgeInsets.only(
-                right: media.size.width * 0.53, top: media.size.height * 0.04),
+                right: media.size.width * 0.48, top: media.size.height * 0.04),
             child: Image.asset(
               'assets/image/logo1.png',
               height: 44,
@@ -41,7 +97,7 @@ class _AddEmployeeMangeScreenState extends State<AddEmployeeMangeScreen> {
           backgroundColor: Colors.white,
           elevation: 0,
           title: Padding(
-            padding: EdgeInsets.only(left: media.size.width * 0.08),
+            padding: EdgeInsets.only(left: media.size.width * 0.11),
             child: Text('ADD EMPLOYEE',
                 style: GoogleFonts.armata(
                   fontSize: 17,
@@ -51,42 +107,52 @@ class _AddEmployeeMangeScreenState extends State<AddEmployeeMangeScreen> {
                 )),
           ),
           leadingWidth: 64,
+          actions: [
+            Padding(
+              padding: EdgeInsets.only(right: media.size.width * 0.03),
+              child: GestureDetector(
+                onTap: () {
+                  idNull ? savee() : saveEdit();
+                },
+                child: Image.asset(
+                    'assets/image/download3-removebg-preview (1).png'),
+              ),
+            )
+          ],
         ),
       ),
       body: SingleChildScrollView(
         child: Column(
           children: [
             SizedBox(height: media.size.height * 0.04),
-            textfield(
-              media,
-              'ID',
-              const Icon(Icons.key),
+            TextFelid(
+              mediaQury: media,
+              text: 'ID',
+              icon: const Icon(Icons.key),
+              controller: widget.idController,
             ),
-            textfield(
-              media,
-              'Joining Date',
-              const Icon(Icons.key),
+            calendar(media, context, widget.joniningController, 'joining Date'),
+            TextFelid(
+              controller: widget.nameController,
+              mediaQury: media,
+              text: 'name',
+              icon: const Icon(Icons.key),
             ),
-            textfield(
-              media,
-              'name',
-              const Icon(Icons.key),
-            ),
-            textfield(
-              media,
-              'Desstination',
-              const Icon(Icons.key),
-            ),
-            textfield(
-              media,
-              'Mobile number',
-              const Icon(Icons.key),
-            ),
-            textfield(
-              media,
-              'Adress',
-              const Icon(Icons.key),
-            ),
+            TextFelid(
+                controller: widget.desstinationController,
+                mediaQury: media,
+                text: 'Desstination',
+                icon: const Icon(Icons.key)),
+            TextFelid(
+                controller: widget.numberController,
+                mediaQury: media,
+                text: 'Mobile number',
+                icon: const Icon(Icons.key)),
+            TextFelid(
+                controller: widget.addressController,
+                mediaQury: media,
+                text: 'Adress',
+                icon: const Icon(Icons.key)),
             SizedBox(
               height: media.size.height * 0.030,
             ),
@@ -128,12 +194,12 @@ class _AddEmployeeMangeScreenState extends State<AddEmployeeMangeScreen> {
                     ),
                     leading: Radio(
                         value: 'Day',
-                        groupValue: gander,
+                        groupValue: buttontao,
                         fillColor: MaterialStateColor.resolveWith(
                             (states) => Colors.black),
                         onChanged: (String? value) {
                           setState(() {
-                            gander = value;
+                            buttontao = value.toString();
                           });
                         }),
                   ),
@@ -150,12 +216,12 @@ class _AddEmployeeMangeScreenState extends State<AddEmployeeMangeScreen> {
                     leading: Radio(
                         focusColor: Colors.black,
                         value: 'Month',
-                        groupValue: gander,
+                        groupValue: buttontao,
                         fillColor: MaterialStateColor.resolveWith(
                             (states) => Colors.black),
                         onChanged: (String? value) {
                           setState(() {
-                            gander = value;
+                            buttontao = value.toString();
                           });
                         }),
                   ),
@@ -204,25 +270,87 @@ class _AddEmployeeMangeScreenState extends State<AddEmployeeMangeScreen> {
     );
   }
 
-  Padding textfield(MediaQueryData mediaQury, String text, Icon icon) {
+  Padding calendar(MediaQueryData media, BuildContext context,
+      TextEditingController controller, String text) {
     return Padding(
       padding: EdgeInsets.only(
-          top: mediaQury.size.height * 0.01,
-          left: mediaQury.size.width * 0.10,
-          right: mediaQury.size.width * 0.10),
-      child: TextFormField(
-        // controller: mailController,
+          top: media.size.height * 0.01,
+          left: media.size.width * 0.10,
+          right: media.size.width * 0.10),
+      child: TextField(
+        controller: controller,
         decoration: InputDecoration(
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(20),
           ),
-          hintText: text,
-          hintStyle: TextStyle(color: Colors.grey, letterSpacing: 1.3),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(20),
+            borderSide: const BorderSide(width: 1, color: Colors.black),
+          ),
+          prefixIcon: const Icon(
+            Icons.calendar_month_outlined,
+            color: Colors.black,
+          ),
+          hintStyle: const TextStyle(color: Colors.grey, letterSpacing: 1.3),
           filled: true,
           fillColor: Colors.white,
-          prefixIcon: icon,
+          hintText: text,
         ),
+        readOnly: true,
+        onTap: () async {
+          DateTime? pickedDate = await showDatePicker(
+              context: context,
+              initialDate: DateTime.now(),
+              firstDate: DateTime(2000),
+              lastDate: DateTime(2030));
+          if (pickedDate != null) {
+            String formatDate = DateFormat("dd-MM-yyyy").format(pickedDate);
+            setState(() {
+              controller.text = formatDate.toString();
+            });
+          } else {
+            print('No Selected');
+          }
+        },
       ),
     );
+  }
+
+  savee() {
+    final databasee =
+        $FloorAppDatabase.databaseBuilder('addEmployee.db').build();
+    databasee.then((value) {
+      value.emplDao.getMaxId().then((val) {
+        int id = 1;
+        if (val != null) {
+          id = val.id + 1;
+        }
+        value.emplDao.insertEEmployee(AddEmployee(
+            id,
+            widget.joniningController.value.text,
+            widget.nameController.value.text,
+            widget.desstinationController.value.text,
+            widget.numberController.value.text,
+            widget.addressController.value.text,
+            buttontao!));
+      });
+    });
+    Navigator.pop(context);
+  }
+
+  saveEdit() {
+    final database =
+        $FloorAppDatabase.databaseBuilder('addEmployee.db').build();
+    database.then((value) {
+      value.emplDao.updateTodo(AddEmployee(
+          widget.id!,
+          widget.joniningController.value.text,
+          widget.nameController.value.text,
+          widget.desstinationController.value.text,
+          widget.numberController.value.text,
+          widget.addressController.value.text,
+          buttontao!));
+    });
+    Navigator.pop(context);
   }
 }

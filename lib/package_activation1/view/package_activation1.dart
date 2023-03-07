@@ -26,16 +26,14 @@ class PackageActivation1 extends StatelessWidget {
             padding: EdgeInsets.only(
                 right: mediaquery.size.width * 0.59,
                 top: mediaquery.size.height * 0.04),
-            child: Container(
-              child: Image.asset(
-                'assets/image/logo1.png',
-                height: 44,
-                width: 44,
-              ),
-              // fit: BoxFit.cover,
+            child: Image.asset(
+              'assets/image/logo1.png',
+              height: 44,
+              width: 44,
             ),
           ),
-          shape: Border(bottom: BorderSide(color: Colors.redAccent, width: 4)),
+          shape: const Border(
+              bottom: BorderSide(color: Colors.redAccent, width: 4)),
           backgroundColor: Colors.white,
           elevation: 0,
           title: Padding(

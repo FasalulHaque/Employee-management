@@ -1,16 +1,27 @@
+import 'dart:io';
+
 import 'package:floor/floor.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
-import 'package:project_1/add_project/view/widget.dart';
-import 'package:project_1/database/model.dart';
-import 'package:image_picker/image_picker.dart';
+import 'package:project_1/dashboard/pages/add_project/view/widget.dart';
 
-import '../../database/database.dart';
+import '../database/database.dart';
+import '../database/model.dart';
 
 class AddProjects extends StatefulWidget {
-  AddProjects({super.key});
+  AddProjects(
+      {super.key,
+      this.id,
+      this.pname,
+      this.owname,
+      this.number,
+      this.type,
+      this.stDate,
+      this.enDate,
+      this.amound});
+
   final TextEditingController _amountController = TextEditingController();
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _mobileController = TextEditingController();
@@ -19,22 +30,44 @@ class AddProjects extends StatefulWidget {
   final TextEditingController _endDataController = TextEditingController();
   final TextEditingController _projectNameController = TextEditingController();
   final TextEditingController _idController = TextEditingController();
+  late final Function(File) onImageSelected;
+
+  final int? id;
+  final String? pname;
+  final String? owname;
+  final String? number;
+  final String? type;
+  final String? stDate;
+  final String? enDate;
+  final String? amound;
 
   @override
   State<AddProjects> createState() => _AddProjectsState();
 }
 
+String? vauuu;
+late final Function(File) onImageSelected;
+
 class _AddProjectsState extends State<AddProjects> {
-  String? valuu;
+  String? imagePath;
   bool _value = false;
   String? buttontao;
-  late final XFile? image;
 
-  Future<XFile?> getImage() async {
-    print('==========');
-    final _imagePicker = ImagePicker();
+  bool idNull = true;
 
-    image = await _imagePicker.pickImage(source: ImageSource.gallery);
+  @override
+  void initState() {
+    if (widget.id != null) {
+      widget._amountController.text = widget.amound!;
+      widget._projectNameController.text = widget.pname!;
+      widget._mobileController.text = widget.number!;
+      widget._nameController.text = widget.owname!;
+      buttontao = widget.type!;
+      widget._stDateController.text = widget.stDate!;
+      widget._endDataController.text = widget.enDate!;
+      idNull = false;
+    }
+    super.initState();
   }
 
   @override
@@ -78,13 +111,11 @@ class _AddProjectsState extends State<AddProjects> {
           ),
           leadingWidth: 64,
           actions: [
-            GestureDetector(
-                // onTap: _showDatePicker,
-                child: Padding(
+            Padding(
               padding: EdgeInsets.only(right: media.size.width * 0.03),
               child: Image.asset(
                   'assets/image/download3-removebg-preview (1).png'),
-            ))
+            )
           ],
         ),
       ),
@@ -124,7 +155,7 @@ class _AddProjectsState extends State<AddProjects> {
             padding: EdgeInsets.only(
                 right: media.size.width * 0.39, top: media.size.height * 0.02),
             child: GestureDetector(
-              onTap: getImage,
+              // onTap: pickAndSaveImage,
               child: Container(
                 height: media.size.height * 0.060,
                 width: media.size.width * 0.4,
@@ -198,12 +229,15 @@ class _AddProjectsState extends State<AddProjects> {
                 style: GoogleFonts.anekBangla(fontSize: 23),
               ),
               GestureDetector(
-                onTap: _save,
+                onTap: () {
+                  idNull ? _save() : saveEdit();
+                },
                 child: Switch.adaptive(
                   value: _value,
                   activeTrackColor: Colors.redAccent,
                   activeColor: Colors.white,
-                  onChanged: (newValue) => setState(() => _value = _save()),
+                  onChanged: (newValue) =>
+                      setState(() => _value = idNull ? _save() : saveEdit()),
                 ),
               ),
             ],
@@ -268,16 +302,33 @@ class _AddProjectsState extends State<AddProjects> {
           id = val.id + 1;
         }
         value.todoDeo.insertTodo(Todo(
-            id,
-            widget._amountController.value.text,
-            widget._nameController.value.text,
-            widget._mobileController.value.text,
-            buttontao!,
-            widget._stDateController.value.text,
-            widget._endDataController.value.text,
-            widget._projectNameController.value.text,
-            ));
+          id,
+          widget._amountController.value.text,
+          widget._nameController.value.text,
+          widget._mobileController.value.text,
+          buttontao!,
+          widget._stDateController.value.text,
+          widget._endDataController.value.text,
+          widget._projectNameController.value.text,
+        ));
       });
+    });
+    Navigator.pop(context);
+  }
+
+  saveEdit() {
+    final database = $FloorAppDatabase.databaseBuilder('todo.db').build();
+    database.then((value) {
+      value.todoDeo.updateTodo(Todo(
+        widget.id!,
+        widget._amountController.value.text,
+        widget._nameController.value.text,
+        widget._mobileController.value.text,
+        buttontao!,
+        widget._stDateController.value.text,
+        widget._endDataController.value.text,
+        widget._projectNameController.value.text,
+      ));
     });
     Navigator.pop(context);
   }

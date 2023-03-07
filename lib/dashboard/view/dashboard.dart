@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../employee_list/view/employee_list.dart';
-import '../../project_list/view/project_list.dart';
+import '../pages/project_list/view/project_list.dart';
 
 class Dashboard extends StatelessWidget {
   Dashboard({super.key});
